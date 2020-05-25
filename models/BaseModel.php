@@ -7,6 +7,7 @@ use ctblue\cpanel\Config;
 class BaseModel
 {
     public $errors = [];
+    public $dataClass = '';
     /**
      * @var Config|null
      */
@@ -23,14 +24,14 @@ class BaseModel
 
     /**
      * @param $url
-     * @return bool|string
+     * @return Response
      */
     public function call($url)
     {
         $url = $this->config->apiUrl . $url;
         $ch = curl_init($url);
         $headr = array();
-        $headr[] = 'Authorization: cpanel ' . $this->config->username . ':' . $this->config->apiHash;
+        $headr[] = 'Authorization: cpanel ' . $this->config->cpanelUsername . ':' . $this->config->apiHash;
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -38,12 +39,36 @@ class BaseModel
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        $return = curl_exec($ch);
-        curl_close($ch);
+        $jsonData = curl_exec($ch);
         if (curl_errno($ch)) {
             $error_msg = curl_error($ch);
+            curl_close($ch);
+            if ($error_msg) {
+                $response = new Response();
+                $response->errors = [];
+                $response->errors[] = $error_msg;
+                return $response;
+            }
         }
-        $return = json_decode($return);
-        return $return;
+        curl_close($ch);
+//        $jsonData = json_decode($jsonData);
+//        echo $this->dataClass;exit;
+        $response = new Response($jsonData, $this->dataClass);
+        return $response;
+    }
+
+    public function set($data)
+    {
+        foreach ($data AS $key => $value) {
+            if (is_array($value)) {
+//                echo $this->dataClass;exit;
+                if ($this->dataClass) {
+                    $sub = new $this->dataClass;
+                    $sub->set($value);
+                    $value = $sub;
+                }
+            }
+            $this->{$key} = $value;
+        }
     }
 }
