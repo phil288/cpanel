@@ -39,11 +39,11 @@ class BaseModel
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         $return = curl_exec($ch);
+        curl_close($ch);
         if (curl_errno($ch)) {
             $error_msg = curl_error($ch);
-
         }
-        curl_close($ch);
+        $return = json_decode($return);
         return $return;
     }
 }

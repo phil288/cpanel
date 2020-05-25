@@ -5,7 +5,7 @@ namespace ctblue\cpanel;
 
 use ctblue\cpanel\models\BaseModel;
 
-class Email extends BaseModel
+class EmailApi extends BaseModel
 {
 
     /**
@@ -20,6 +20,6 @@ class Email extends BaseModel
     public function listEmailAddresses()
     {
         $url = '/execute/Email/list_pops';
-        $this->call($url, $this->config);
+        return $this->call($url, $this->config);
     }
 }
