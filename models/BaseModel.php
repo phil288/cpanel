@@ -7,7 +7,7 @@ use ctblue\cpanel\Config;
 class BaseModel
 {
     public $errors = [];
-    public $dataClass = '';
+    protected $dataClass = '';
     /**
      * @var Config|null
      */
@@ -51,21 +51,27 @@ class BaseModel
             }
         }
         curl_close($ch);
-//        $jsonData = json_decode($jsonData);
-//        echo $this->dataClass;exit;
+//        var_dump($jsonData);exit;
+        $jsonData = json_decode($jsonData, true);
         $response = new Response($jsonData, $this->dataClass);
+//        var_dump($response->data);
+//        exit;
         return $response;
     }
 
     public function set($data)
     {
         foreach ($data AS $key => $value) {
-            if (is_array($value)) {
-//                echo $this->dataClass;exit;
+            if ($key == 'data' && is_array($value)) {
                 if ($this->dataClass) {
-                    $sub = new $this->dataClass;
-                    $sub->set($value);
-                    $value = $sub;
+                    for ($i = 0; $i < count($value); $i++) {
+                        $v = $value[$i];
+                        $sub = new $this->dataClass;
+                        $sub->set($v);
+                        unset($sub->dataClass);
+                        unset($sub->config);
+                        $value[$i] = $sub;
+                    }
                 }
             }
             $this->{$key} = $value;

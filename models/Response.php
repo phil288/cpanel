@@ -17,14 +17,14 @@ class Response extends BaseModel
     public function __construct($json = false, $dataClass = '')
     {
         $this->dataClass = $dataClass;
-        if ($json) $this->set(json_decode($json, true));
+        if ($json) $this->set($json);
     }
 
     public function hasErrors()
     {
-//        var_dump(count($this->errors));exit;
+//        var_dump($this->errors);exit;
         if ($this->errors) {
-            if (is_array($this->errors) && count($this->errors) > 0) return true;
+            if (is_array($this->errors) && count($this->errors) > 0 || is_object($this->errors)) return true;
         }
         return false;
     }
